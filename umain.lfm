@@ -1,0 +1,21 @@
+object MainForm: TMainForm
+  Left = 256
+  Height = 530
+  Top = 250
+  Width = 741
+  Caption = 'Simple3DEngine'
+  ClientHeight = 530
+  ClientWidth = 741
+  LCLVersion = '4.6.0.0'
+  OnCreate = FormCreate
+  object DisplayCanvas: TPaintBox
+    Left = 0
+    Height = 530
+    Top = 0
+    Width = 741
+    Align = alClient
+    Color = clBlack
+    ParentColor = False
+    OnPaint = DisplayCanvasPaint
+  end
+end
