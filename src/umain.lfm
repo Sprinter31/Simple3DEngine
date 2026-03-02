@@ -1,0 +1,29 @@
+object MainForm: TMainForm
+  Left = 256
+  Height = 530
+  Top = 250
+  Width = 741
+  Caption = 'Simple3DEngine'
+  ClientHeight = 530
+  ClientWidth = 741
+  LCLVersion = '4.6.0.0'
+  OnCreate = FormCreate
+  OnResize = FormResize
+  object DisplayCanvas: TPaintBox
+    Left = 0
+    Height = 530
+    Top = 0
+    Width = 741
+    Anchors = []
+    Color = clBlack
+    ParentColor = False
+    OnPaint = DisplayCanvas_Paint
+  end
+  object PaintTimer: TTimer
+    Enabled = False
+    Interval = 16
+    OnTimer = PaintTimer_Tick
+    Left = 10
+    Top = 10
+  end
+end

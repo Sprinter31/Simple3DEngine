@@ -40,10 +40,10 @@ implementation
 constructor TMesh.Create;
 begin
   SetLength(FVertices, 4);
-  FVertices[0] := TVertex.Create(-0.8, 0.8, 0);
-  FVertices[1] := TVertex.Create(0.8, 0.8, 0);
-  FVertices[2] := TVertex.Create(0.8, -0.8, 0);
-  FVertices[3] := TVertex.Create(-0.8, -0.8, 0);
+  FVertices[0] := TVertex.Create(-0.8, 0.8, 2);
+  FVertices[1] := TVertex.Create(0.8, 0.8, 2);
+  FVertices[2] := TVertex.Create(0.8, -0.8, 2);
+  FVertices[3] := TVertex.Create(-0.8, -0.8, 2);
 
   SetLength(FLines, 4);
   FLines[0] := TLine.Create(0, 1);

@@ -57,6 +57,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uRenderer"/>
       </Unit>
+      <Unit>
+        <Filename Value="src\glTF\ugltf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uGLTF"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -67,7 +72,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="Simple3DEngine;src"/>
+      <OtherUnitFiles Value="Simple3DEngine;src;src\glTF"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>

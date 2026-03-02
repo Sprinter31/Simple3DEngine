@@ -27,13 +27,13 @@ var
 begin
   mesh := TMesh.Create;
 
-  SetLength(FMeshStates, 100);
+  SetLength(FMeshStates, 2000);
   for i := 0 to High(FMeshStates) do begin
      mesh := mesh.Clone;
      FMeshStates[i] := mesh;
 
      for k := 0 to High(mesh.Vertices) do
-         mesh.Vertices[k] := TVertex.Create(mesh.Vertices[k].X, mesh.Vertices[k].Y, mesh.Vertices[k].Z + 0.1);
+         mesh.Vertices[k] := TVertex.Create(mesh.Vertices[k].X , mesh.Vertices[k].Y + 0.05, mesh.Vertices[k].Z + 0.1);
   end;
 end;
 

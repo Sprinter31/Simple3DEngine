@@ -71,8 +71,8 @@ var
   pointA, pointB: T2DPoint;
   i: Integer;
 begin
-   SetLength(Result, Length(FMesh.Lines));
-   for i := Low(mesh.Lines) to High(FMesh.Lines) do begin
+   SetLength(Result, Length(mesh.Lines));
+   for i := Low(mesh.Lines) to High(mesh.Lines) do begin
       line := mesh.Lines[i];
 
       vertexA := mesh.Vertices[line.A];
