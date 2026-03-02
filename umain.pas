@@ -5,7 +5,7 @@ unit uMain;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, uMesh, uRenderer;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, uMesh, uAnimation, uRenderer;
 
 type
 
@@ -13,17 +13,22 @@ type
 
   TMainForm = class(TForm)
     DisplayCanvas: TPaintBox;
-    procedure DisplayCanvasPaint(Sender: TObject);
+    PaintTimer: TTimer;
+    procedure DisplayCanvas_Paint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure Form_Destroy(Sender: TObject);
+    procedure PaintTimer_Tick(Sender: TObject);
   private
-    renderer: TRenderer;
+    FCurBitmap: TBitmap;
+    FAnimation: TAnimation;
+    FCurAnimationIndex: Integer;
+    FRenderer: TRenderer;
   public
 
   end;
 
 var
   MainForm: TMainForm;
-  ints: Array[0..10] of Integer;
 
 implementation
 
@@ -31,26 +36,42 @@ implementation
 
 { TMainForm }
 
-procedure TMainForm.DisplayCanvasPaint(Sender: TObject);
-var
-  line: T2DLine;
+procedure TMainForm.DisplayCanvas_Paint(Sender: TObject);
 begin
-   DisplayCanvas.Canvas.Brush.Color := clBlack;
-   DisplayCanvas.Canvas.Rectangle(DisplayCanvas.ClientRect);
-
-   DisplayCanvas.Canvas.Pen.Color := clGreen;
-   DisplayCanvas.Canvas.Pen.Width := 2;
-
-   for line in renderer.RenderLines do begin
-       DisplayCanvas.Canvas.MoveTo(Round(line.A.X), Round(line.A.Y));
-       DisplayCanvas.Canvas.LineTo(Round(line.B.X), Round(line.B.Y));
-   end;
-
+   DisplayCanvas.Canvas.Draw(0, 0, FCurBitmap);
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  renderer := TRenderer.Create(Width, Height);
+  FCurAnimationIndex := 0;
+  FRenderer := TRenderer.Create(DisplayCanvas.Width, DisplayCanvas.Height);
+  FAnimation := TAnimation.Create;
+  FCurBitmap := FRenderer.RenderMesh(FAnimation.States[FCurAnimationIndex]);
+
+  PaintTimer.Enabled := true;
+end;
+
+procedure TMainForm.PaintTimer_Tick(Sender: TObject);
+var newBitmap: TBitmap;
+begin
+   newBitmap := FRenderer.RenderMesh(FAnimation.States[FCurAnimationIndex]);
+
+   FCurBitmap.Free;
+
+   FCurBitmap := NewBitmap;
+
+   Inc(FCurAnimationIndex);
+   if FCurAnimationIndex >= Length(FAnimation.States) then
+      FCurAnimationIndex := 0;
+
+   DisplayCanvas.Invalidate;
+end;
+
+procedure TMainForm.Form_Destroy(Sender: TObject);
+begin
+  FCurBitmap.Free;
+  FAnimation.Free;
+  FRenderer.Free;
 end;
 
 end.

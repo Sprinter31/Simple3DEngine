@@ -8,6 +8,7 @@ object MainForm: TMainForm
   ClientWidth = 741
   LCLVersion = '4.6.0.0'
   OnCreate = FormCreate
+  OnDestroy = Form_Destroy
   object DisplayCanvas: TPaintBox
     Left = 0
     Height = 530
@@ -16,6 +17,13 @@ object MainForm: TMainForm
     Align = alClient
     Color = clBlack
     ParentColor = False
-    OnPaint = DisplayCanvasPaint
+    OnPaint = DisplayCanvas_Paint
+  end
+  object PaintTimer: TTimer
+    Enabled = False
+    Interval = 1
+    OnTimer = PaintTimer_Tick
+    Left = 10
+    Top = 10
   end
 end

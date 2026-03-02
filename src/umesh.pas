@@ -17,6 +17,7 @@ type
       FVertices: TVertexArray;
     public
       constructor Create;
+      function Clone: TMesh;
       property Lines: TLineArray read FLines;
       property Vertices: TVertexArray read FVertices;
   end;
@@ -49,6 +50,20 @@ begin
   FLines[1] := TLine.Create(1, 2);
   FLines[2] := TLine.Create(2, 3);
   FLines[3] := TLine.Create(3, 0);
+end;
+
+function TMesh.Clone: TMesh;
+var i: Integer;
+begin
+  Result := TMesh.Create;
+  SetLength(Result.FVertices, Length(FVertices));
+  SetLength(Result.FLines, Length(FLines));
+
+  for i := 0 to High(Result.FVertices) do
+        Result.FVertices[i] := FVertices[i];
+
+  for i := 0 to High(Result.FLines) do
+        Result.FLines[i] := FLines[i];
 end;
 
 { TLine }

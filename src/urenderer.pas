@@ -5,7 +5,7 @@ unit uRenderer;
 interface
 
 uses
-  Classes, SysUtils, uMesh;
+  Classes, SysUtils, Graphics, uMesh;
 
 type
   T2DPoint = class;
@@ -15,12 +15,12 @@ type
 
   TRenderer = class
     private
-      FMesh: TMesh;
       FScreenWidth, FScreenHeight: Double;
-    public
-      function RenderLines: T2DLineArray;
+      function RenderLines(mesh: TMesh): T2DLineArray;
       function ProjectTo2D(vertex: TVertex): T2DPoint;
       function TranslateToScreen(p: T2DPoint): T2DPoint;
+    public
+      function RenderMesh(mesh: TMesh): TBitmap;
       constructor Create(ScreenWidth, ScreenHeight: Double);
   end;
 
@@ -44,23 +44,39 @@ constructor TRenderer.Create(ScreenWidth, ScreenHeight: Double);
 begin
   FScreenWidth := ScreenWidth;
   FScreenHeight := ScreenHeight;
-
-  FMesh := TMesh.Create;
 end;
 
-function TRenderer.RenderLines: T2DLineArray;
+function TRenderer.RenderMesh(mesh: TMesh): TBitmap;
+var line: T2DLine;
+begin
+  Result := TBitmap.Create;
+
+  Result.Width := Round(FScreenWidth);
+  Result.Height := Round(FScreenHeight);
+
+  Result.Canvas.Brush.Color := clBlack;
+  Result.Canvas.FillRect(Rect(0, 0, Result.Width, Result.Height));
+
+  Result.Canvas.Pen.Color := clGreen;
+  Result.Canvas.Pen.Width := 2;
+
+  for line in RenderLines(mesh) do
+       Result.Canvas.Line(Round(line.A.X), Round(line.A.Y), Round(line.B.X), Round(line.B.Y));
+end;
+
+function TRenderer.RenderLines(mesh: TMesh): T2DLineArray;
 var
   line: TLine;
   vertexA, vertexB: TVertex;
   pointA, pointB: T2DPoint;
   i: Integer;
 begin
-   SetLength(Result, Length(FMesh.Lines));
-   for i := Low(FMesh.Lines) to High(FMesh.Lines) do begin
-      line := FMesh.Lines[i];
+   SetLength(Result, Length(mesh.Lines));
+   for i := Low(mesh.Lines) to High(mesh.Lines) do begin
+      line := mesh.Lines[i];
 
-      vertexA := FMesh.Vertices[line.A];
-      vertexB := FMesh.Vertices[line.B];
+      vertexA := mesh.Vertices[line.A];
+      vertexB := mesh.Vertices[line.B];
 
       pointA := TranslateToScreen(ProjectTo2D(vertexA));
       pointB := TranslateToScreen(ProjectTo2D(vertexB));
@@ -81,7 +97,7 @@ function TRenderer.TranslateToScreen(p: T2DPoint): T2DPoint;
 var x, y: Double;
 begin
    x := (p.X + 1) * FScreenWidth/2;
-   y := (p.Y * - 1 + 1) * FScreenHeight/2;
+   y := (p.Y * -1 + 1) * FScreenHeight/2;
    Result := T2DPoint.Create(x, y);
 end;
 
