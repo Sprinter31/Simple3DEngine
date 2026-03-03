@@ -58,7 +58,7 @@ begin
   Result.Canvas.FillRect(Rect(0, 0, Result.Width, Result.Height));
 
   Result.Canvas.Pen.Color := clGreen;
-  Result.Canvas.Pen.Width := 2;
+  Result.Canvas.Pen.Width := 1;
 
   for line in RenderLines(mesh) do
        Result.Canvas.Line(Round(line.A.X), Round(line.A.Y), Round(line.B.X), Round(line.B.Y));

@@ -10,7 +10,7 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="5"/>
         <CursorPos X="9" Y="28"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="46"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -20,16 +20,15 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uMain"/>
-        <UsageCount Value="30"/>
+        <UsageCount Value="34"/>
       </Unit>
       <Unit>
         <Filename Value="src\umesh.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uMesh"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="14"/>
-        <CursorPos X="47" Y="46"/>
-        <UsageCount Value="40"/>
+        <CursorPos X="16" Y="63"/>
+        <UsageCount Value="44"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -38,25 +37,25 @@
         <UnitName Value="u2DPoint"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="12"/>
-        <UsageCount Value="40"/>
+        <UsageCount Value="44"/>
       </Unit>
       <Unit>
         <Filename Value="src\urenderer.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uRenderer"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="35"/>
-        <CursorPos X="19" Y="22"/>
-        <UsageCount Value="39"/>
+        <TopLine Value="63"/>
+        <CursorPos Y="90"/>
+        <UsageCount Value="43"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="src\glTF\ugltf.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uGLTF"/>
-        <TopLine Value="69"/>
-        <CursorPos X="25" Y="73"/>
-        <UsageCount Value="29"/>
+        <TopLine Value="29"/>
+        <CursorPos X="80" Y="106"/>
+        <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -65,11 +64,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uMain"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="33"/>
-        <CursorPos X="62" Y="59"/>
-        <UsageCount Value="15"/>
+        <TopLine Value="39"/>
+        <CursorPos Y="81"/>
+        <UsageCount Value="16"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit>
@@ -78,7 +76,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="184"/>
         <CursorPos X="23" Y="206"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="C:\lazarus\lcl\extctrls.pp"/>
@@ -86,7 +84,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="465"/>
         <CursorPos X="14" Y="482"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="C:\lazarus\lcl\controls.pp"/>
@@ -94,7 +92,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1820"/>
         <CursorPos X="14" Y="1846"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="C:\lazarus\lcl\graphics.pp"/>
@@ -102,14 +100,15 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="742"/>
         <CursorPos X="22" Y="782"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="src\uanimation.pas"/>
         <UnitName Value="uAnimation"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <CursorPos X="119" Y="36"/>
-        <UsageCount Value="16"/>
+        <CursorPos X="158" Y="34"/>
+        <UsageCount Value="17"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -117,12 +116,12 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1684"/>
         <CursorPos Y="1711"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit>
       <Unit>
         <Filename Value="umain.lfm"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit>
       <Unit>
@@ -130,14 +129,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1001"/>
         <CursorPos X="45" Y="1020"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit>
       <Unit>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\packages\fcl-json\src\fpjson.pp"/>
         <EditorIndex Value="1"/>
         <TopLine Value="135"/>
         <CursorPos X="14" Y="161"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="14"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -145,129 +144,129 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1635"/>
         <CursorPos Y="1662"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
       <Position>
         <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="149" Column="5" TopLine="98"/>
+        <Caret Line="109" Column="43" TopLine="59"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="153" Column="16" TopLine="127"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="30" Column="21" TopLine="9"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="111" Column="39" TopLine="86"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="41" Column="57" TopLine="9"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="214" Column="26" TopLine="175"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="45" Column="39" TopLine="9"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="164" Column="43" TopLine="138"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="28" Column="25" TopLine="9"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="116" Column="53" TopLine="85"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="26" Column="7" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="180" Column="14" TopLine="153"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="35" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="175" Column="89" TopLine="148"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="216" Column="45" TopLine="177"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="37" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="165" Column="30" TopLine="130"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="166" Column="10" TopLine="140"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="37" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="108" Column="67" TopLine="64"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="82" Column="26" TopLine="60"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="37" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="110" Column="17" TopLine="66"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="105" Column="56" TopLine="68"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="37" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="212" Column="12" TopLine="174"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="57" Column="5" TopLine="21"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="37" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="109" Column="74" TopLine="84"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="220" Column="65" TopLine="195"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="37" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="63" Column="40" TopLine="26"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="65" TopLine="30"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="37" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="12" Column="3"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\glTF\ugltf.pas"/>
-        <Caret Line="16" Column="11"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="37" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="8" Column="103"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="27" Column="28"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="37" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="58" Column="106" TopLine="26"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="36" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="44" Column="14" TopLine="31"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="41" Column="8" TopLine="5"/>
       </Position>
       <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="59" Column="32" TopLine="33"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="44" Column="34"/>
       </Position>
       <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="61" Column="38" TopLine="33"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="45" Column="31"/>
       </Position>
       <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="59" Column="57" TopLine="33"/>
+        <Filename Value="src\uanimation.pas"/>
+        <Caret Line="41" Column="59"/>
       </Position>
     </JumpHistory>
     <RunParams>

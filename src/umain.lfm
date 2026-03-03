@@ -1,11 +1,11 @@
 object MainForm: TMainForm
   Left = 256
-  Height = 530
+  Height = 1000
   Top = 250
-  Width = 741
+  Width = 1000
   Caption = 'Simple3DEngine'
-  ClientHeight = 530
-  ClientWidth = 741
+  ClientHeight = 1000
+  ClientWidth = 1000
   LCLVersion = '4.6.0.0'
   OnCreate = FormCreate
   OnResize = FormResize

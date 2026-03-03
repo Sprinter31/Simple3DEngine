@@ -15,11 +15,11 @@ type
 
   TRenderer = class
     private
-      FScreenWidth, FScreenHeight: Double;
       function RenderLines(mesh: TMesh): T2DLineArray;
       function ProjectTo2D(vertex: TVertex): T2DPoint;
       function TranslateToScreen(p: T2DPoint): T2DPoint;
     public
+      FScreenWidth, FScreenHeight: Double;
       function RenderMesh(mesh: TMesh): TBitmap;
       constructor Create(ScreenWidth, ScreenHeight: Double);
   end;

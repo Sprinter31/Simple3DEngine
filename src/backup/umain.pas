@@ -24,7 +24,6 @@ type
     FAnimation: TAnimation;
     FCurAnimationIndex: Integer;
     FRenderer: TRenderer;
-    FGLBParser: TGLBParser;
   public
 
   end;
@@ -42,24 +41,18 @@ procedure TMainForm.FormCreate(Sender: TObject);
 var
   data: TGLBData;
   i: Integer;
+  parser: TGLBParser;
 begin
+  parser := TGLBParser.Create;
+  data := parser.LoadGLB('C:\Users\Leo\Downloads\henry_waternoose_monsters_inc.glb');
+
   FCurAnimationIndex := 0;
   FRenderer := TRenderer.Create(DisplayCanvas.Width, DisplayCanvas.Height);
-  FAnimation := TAnimation.Create;
+  FAnimation := TAnimation.Create(data);
   FCurBitmap := FRenderer.RenderMesh(FAnimation.States[FCurAnimationIndex]);
-  FGLBParser := TGLBParser.Create;
+
   PaintTimer.Enabled := true;
-
-
-
-  data := FGLBParser.LoadGLB('C:\Users\Leo\Downloads\henry_waternoose_monsters_inc.glb');
-
-
-  for i := 0 to High(data.Vertices) do
-      ShowMessage('Vertex: ' + FloatToStr(data.Vertices[i].X)) + ', ' + FloatToStr(data.Vertices[i].Y) + ', ' + FloatToStr(data.Vertices[i].Z));
 end;
-
-
 
 procedure TMainForm.DisplayCanvas_Paint(Sender: TObject);
 begin

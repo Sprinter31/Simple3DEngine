@@ -10,7 +10,7 @@ uses
 type
   TGLBData = class;
 
-  TVertex = class
+  TVertexSingle = class
         X, Y, Z: Single;
         constructor Create(aX, aY, aZ: Single);
       end;
@@ -54,15 +54,19 @@ type
     function DeserializeJsonToRoot(jsonString: String): TGLBRoot;
     function ReadHeader(stream: TFileStream): TGLBHeader;
     function ReadChunk(stream: TFileStream): TGLBChunk;
-    function ReadVertices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVertex>;
+    function ReadVertices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVertexSingle>;
     function ReadIndices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<Integer>;
   public
     function LoadGLB(path: String): TGLBData;
   end;
 
-  TGLBData = class
-     Vertices: specialize TArray<TVertex>;
+  TVFs = class
+     Vertices: specialize TArray<TVertexSingle>;
      Faces: specialize TArray<Integer>;
+  end;
+
+  TGLBData = class
+     Meshes: specialize TArray<TVFs>;
   end;
 
 implementation
@@ -79,6 +83,7 @@ var
   primitive: TGLBPrimitive;
   positionAccessor, indexAccessor: TGLBAccessor;
   positionView, indexView: TGLBBufferView;
+  i: Integer;
 begin
    Result := TGLBData.Create;
    stream := TFileStream.Create(path, fmOpenRead);
@@ -94,17 +99,21 @@ begin
       SetString(jsonString, PAnsiChar(@jsonChunk.Data[0]), Length(jsonChunk.Data));
       root := DeserializeJsonToRoot(jsonString);
 
-      primitive := root.Meshes[0].Primitives[0];
+      SetLength(Result.Meshes, Length(root.Meshes));
+      for i := 0 to High(root.Meshes) do begin
+          primitive := root.Meshes[i].Primitives[0];
 
-      positionAccessor := root.Accessors[primitive.Attributes['POSITION']];
-      positionView := root.BufferViews[positionAccessor.BufferView];
+          positionAccessor := root.Accessors[primitive.Attributes['POSITION']];
+          positionView := root.BufferViews[positionAccessor.BufferView];
 
-      Result.Vertices :=  ReadVertices(positionAccessor, positionView, binChunk.Data);
+          Result.Meshes[i] := TVFs.Create;
+          Result.Meshes[i].Vertices := ReadVertices(positionAccessor, positionView, binChunk.Data);
 
-      indexAccessor := root.Accessors[primitive.Indices];
-      indexView := root.BufferViews[indexAccessor.BufferView];
+          indexAccessor := root.Accessors[primitive.Indices];
+          indexView := root.BufferViews[indexAccessor.BufferView];
 
-      Result.Faces := ReadIndices(indexAccessor, indexView, binChunk.Data);
+          Result.Meshes[i].Faces := ReadIndices(indexAccessor, indexView, binChunk.Data);
+      end;
   finally
     stream.Free;
   end;
@@ -177,9 +186,9 @@ begin
   end;
 end;
 
-function TGLBParser.ReadVertices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVertex>;
+function TGLBParser.ReadVertices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVertexSingle>;
 var
-  vertices: specialize TArray<TVertex>;
+  vertices: specialize TArray<TVertexSingle>;
   offset, baseOffset: Integer;
   x, y, z: Single;
   i: Integer;
@@ -200,7 +209,7 @@ begin
      Move(binData[baseOffset + 4], y, SizeOf(Single));
      Move(binData[baseOffset + 8], z, SizeOf(Single));
 
-     vertices[i] := TVertex.Create(x, y, z);
+     vertices[i] := TVertexSingle.Create(x, y, z);
    end;
 
    Result := vertices;
@@ -243,7 +252,7 @@ end;
 
 { TVertex }
 
-constructor TVertex.Create(aX, aY, aZ: Single);
+constructor TVertexSingle.Create(aX, aY, aZ: Single);
 begin
    X := aX;
    Y := aY;
