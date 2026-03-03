@@ -5,7 +5,7 @@ unit uMain;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, uMesh, uAnimation, uRenderer;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, uMesh, uAnimation, uRenderer, uGLTF;
 
 type
 
@@ -24,6 +24,7 @@ type
     FAnimation: TAnimation;
     FCurAnimationIndex: Integer;
     FRenderer: TRenderer;
+    FGLBParser: TGLBParser;
   public
 
   end;
@@ -38,13 +39,24 @@ implementation
 { TMainForm }
 
 procedure TMainForm.FormCreate(Sender: TObject);
+var
+  data: TGLBData;
+  i: Integer;
 begin
   FCurAnimationIndex := 0;
   FRenderer := TRenderer.Create(DisplayCanvas.Width, DisplayCanvas.Height);
   FAnimation := TAnimation.Create;
   FCurBitmap := FRenderer.RenderMesh(FAnimation.States[FCurAnimationIndex]);
-
+  FGLBParser := TGLBParser.Create;
   PaintTimer.Enabled := true;
+
+
+
+  data := FGLBParser.LoadGLB('C:\Users\Leo\Downloads\henry_waternoose_monsters_inc.glb');
+
+
+  for i := 0 to High(data.Vertices) do
+      ShowMessage('Vertex: ' + FloatToStr(data.Vertices[i].X)) + ', ' + FloatToStr(data.Vertices[i].Y) + ', ' + FloatToStr(data.Vertices[i].Z));
 end;
 
 
@@ -72,7 +84,7 @@ end;
 
 procedure TMainForm.FormResize(Sender: TObject);
 begin
-   DisplayCanvas.SetBounds(DisplayCanvas.Left, DisplayCanvas.Top, Width, Height);
+   DisplayCanvas.SetBounds(0, 0, Width, Height);
    FRenderer.FScreenWidth := Width;
    FRenderer.FScreenHeight := Height;
 end;

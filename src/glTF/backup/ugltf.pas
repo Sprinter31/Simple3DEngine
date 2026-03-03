@@ -8,14 +8,16 @@ uses
   Classes, SysUtils, fpjson, jsonparser, contnrs, fgl;
 
 type
-  TGLBParser = class
-  private
-    type
-      TVertex = class
+  TGLBData = class;
+
+  TVertex = class
         X, Y, Z: Single;
         constructor Create(aX, aY, aZ: Single);
       end;
 
+  TGLBParser = class
+  private
+    type
       TGLBHeader = class
         Magic, Version, Length: Cardinal;
       end;
@@ -49,17 +51,19 @@ type
          Meshes: Array of TGLBMesh;
       end;
 
-      TGLBData = class
-      end;
-
+    function DeserializeJsonToRoot(jsonString: String): TGLBRoot;
     function ReadHeader(stream: TFileStream): TGLBHeader;
-    function ReadChuck(stream: TFileStream): TGLBChunk;
+    function ReadChunk(stream: TFileStream): TGLBChunk;
     function ReadVertices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVertex>;
+    function ReadIndices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<Integer>;
   public
     function LoadGLB(path: String): TGLBData;
   end;
 
-
+  TGLBData = class
+     Vertices: specialize TArray<TVertex>;
+     Faces: specialize TArray<Integer>;
+  end;
 
 implementation
 
@@ -72,68 +76,118 @@ var
   jsonChunk, binChunk: TGLBChunk;
   jsonString: String;
   root: TGLBRoot;
+  primitive: TGLBPrimitive;
+  positionAccessor, indexAccessor: TGLBAccessor;
+  positionView, indexView: TGLBBufferView;
 begin
-   header := ReadHeader(stream);
+   Result := TGLBData.Create;
+   stream := TFileStream.Create(path, fmOpenRead);
+   try
+      header := ReadHeader(stream);
 
-   if header.Magic <> $46546C67 then // $46546C67 gibt an, dass die Datei vom typ GLB ist
-      raise Exception.Create('Invalid GLB');
+      if header.Magic <> $46546C67 then // $46546C67 gibt an, dass die Datei vom typ GLB ist
+         raise Exception.Create('Invalid GLB');
 
-  jsonChunk := ReadChunk(stream);
-  binChunk := ReadChunk(stream);
+      jsonChunk := ReadChunk(stream);
+      binChunk := ReadChunk(stream);
 
-  SetString(json, PChar(@jsonChunk.Data[0]), Length(jsonChunk.Data);
-  root := DeserializeJsonToRoot(jsonString);
+      SetString(jsonString, PAnsiChar(@jsonChunk.Data[0]), Length(jsonChunk.Data));
+      root := DeserializeJsonToRoot(jsonString);
+
+      primitive := root.Meshes[0].Primitives[0];
+
+      positionAccessor := root.Accessors[primitive.Attributes['POSITION']];
+      positionView := root.BufferViews[positionAccessor.BufferView];
+
+      Result.Vertices :=  ReadVertices(positionAccessor, positionView, binChunk.Data);
+
+      indexAccessor := root.Accessors[primitive.Indices];
+      indexView := root.BufferViews[indexAccessor.BufferView];
+
+      Result.Faces := ReadIndices(indexAccessor, indexView, binChunk.Data);
+  finally
+    stream.Free;
+  end;
 end;
 
 function TGLBParser.DeserializeJsonToRoot(jsonString: String): TGLBRoot;
 var
-  i: Integer;
-  arrays: TJSONArray;
+  i, j, k: Integer;
+  rootObj, primitiveObj, attributesObj: TJSONObject;
+  bufferViewsArr, accessorsArr, meshesArr, primitiveArray: TJSONArray;
+  key: String;
 begin
   Result := TGLBRoot.Create;
-  arrays := TJSONObject(GetJSON(jsonString)).Arrays;
+  rootObj := TJSONObject(GetJSON(jsonString));
 
+  bufferViewsArr := rootObj.Arrays['bufferViews'];
+  accessorsArr   := rootObj.Arrays['accessors'];
+  meshesArr      := rootObj.Arrays['meshes'];
 
-  SetLength(Result.BufferViews, arrays['bufferViews'].Count);
-  for i := 0 to High(arrays['bufferViews']) do
+  { BufferViews }
+  SetLength(Result.BufferViews, bufferViewsArr.Count);
+  for i := 0 to bufferViewsArr.Count - 1 do
   begin
     Result.BufferViews[i] := TGLBBufferView.Create;
-    Result.BufferViews[i].Buffer := arrays['bufferViews'].Objects[i].Get('buffer', 0);
-    Result.BufferViews[i].ByteOffset := arrays['bufferViews'].Objects[i].Get('byteOffset', 0);
-    Result.BufferViews[i].ByteLength := arrays['bufferViews'].Objects[i].Get('byteLength', 0);
+    Result.BufferViews[i].Buffer := bufferViewsArr.Objects[i].Get('buffer', 0);
+    Result.BufferViews[i].ByteOffset := bufferViewsArr.Objects[i].Get('byteOffset', 0);
+    Result.BufferViews[i].ByteLength := bufferViewsArr.Objects[i].Get('byteLength', 0);
   end;
 
-  SetLength(Result.Accessors, arrays['accessors'].Count);
-  for i := 0 to High(arrays['accessors']) do
+  { Accessors }
+  SetLength(Result.Accessors, accessorsArr.Count);
+  for i := 0 to accessorsArr.Count - 1 do
   begin
     Result.Accessors[i] := TGLBAccessor.Create;
-    Result.Accessors[i].BufferView := arrays['accessors'].Objects[i].Get('bufferView', 0);
-    Result.Accessors[i].ByteOffset := arrays['accessors'].Objects[i].Get('byteOffset', 0);
-    Result.Accessors[i].Count := arrays['accessors'].Objects[i].Get('count', 0);
-    Result.Accessors[i].ComponentType := arrays['accessors'].Objects[i].Get('componentType', 0);
-    Result.Accessors[i].Typ := arrays['accessors'].Objects[i].Get('type', 0);
+    Result.Accessors[i].BufferView := accessorsArr.Objects[i].Get('bufferView', 0);
+    Result.Accessors[i].ByteOffset := accessorsArr.Objects[i].Get('byteOffset', 0);
+    Result.Accessors[i].Count := accessorsArr.Objects[i].Get('count', 0);
+    Result.Accessors[i].ComponentType := accessorsArr.Objects[i].Get('componentType', 0);
+    Result.Accessors[i].Typ := accessorsArr.Objects[i].Get('type', '');
   end;
 
-  SetLength(Result.Meshes, arrays['meshes'].Count);
-  for i := 0 to High(arrays['meshes']) do
+  { Meshes }
+  SetLength(Result.Meshes, meshesArr.Count);
+  for i := 0 to meshesArr.Count - 1 do
   begin
     Result.Meshes[i] := TGLBMesh.Create;
-    Result.Meshes[i].Buffer := arrays['meshes'].Objects[i].Get('buffer', 0);
-    Result.Meshes[i].ByteOffset := arrays['meshes'].Objects[i].Get('byteOffset', 0);
-    Result.Meshes[i].ByteLength := arrays['meshes'].Objects[i].Get('byteLength', 0);
+
+    primitiveArray := meshesArr.Objects[i].Arrays['primitives'];
+    SetLength(Result.Meshes[i].Primitives, primitiveArray.Count);
+
+    { Primitives }
+    for j := 0 to primitiveArray.Count - 1 do
+    begin
+       primitiveObj := primitiveArray.Objects[j];
+
+       Result.Meshes[i].Primitives[j] := TGLBPrimitive.Create;
+       Result.Meshes[i].Primitives[j].Attributes := specialize TFPGMap<String, Integer>.Create;
+
+       { Attributes }
+       attributesObj := PrimitiveObj.Objects['attributes'];
+       for k := 0 to attributesObj.Count - 1 do
+       begin
+         key := attributesObj.Names[k];
+         Result.Meshes[i].Primitives[j].Attributes.Add(key, attributesObj.Integers[key]);
+       end;
+
+       { Indives }
+       Result.Meshes[i].Primitives[j].Indices := primitiveObj.Get('indices', 0);
+    end;
   end;
 end;
 
-function TGLBParser.ReadVertices(accessor: TGLTFAccessor; view: TGLTFBufferView; binData: specialize TArray<Byte>): specialize TArray<TVertex>;
+function TGLBParser.ReadVertices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVertex>;
 var
   vertices: specialize TArray<TVertex>;
   offset, baseOffset: Integer;
-  x, y, z: Integer;
+  x, y, z: Single;
+  i: Integer;
 begin
    if accessor.ComponentType <> 5126 then
       raise Exception.Create('POSITION is not single');
 
-   if accessor.Type <> 'VEC3' then
+   if accessor.Typ <> 'VEC3' then
       raise Exception.Create('POSITION is not VEC3 (Vector3)');
 
    offset := accessor.ByteOffset + view.ByteOffset;
@@ -142,14 +196,31 @@ begin
    for i := 0 to High(vertices) do begin
      baseOffset := offset + i * 12; // 3 singles = 12 bytes
 
-     Move(binData[baseOffset], x, SizeOf(x));
-     Move(binData[baseOffset], y, SizeOf(x + 4));
-     Move(binData[baseOffset], z, SizeOf(x + 8));
+     Move(binData[baseOffset], x, SizeOf(Single));
+     Move(binData[baseOffset + 4], y, SizeOf(Single));
+     Move(binData[baseOffset + 8], z, SizeOf(Single));
 
      vertices[i] := TVertex.Create(x, y, z);
    end;
 
    Result := vertices;
+end;
+
+function TGLBParser.ReadIndices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<Integer>;
+var
+  i, offset: Integer;
+begin
+   offset := accessor.ByteOffset + view.ByteOffset;
+   SetLength(Result, accessor.Count);
+
+   if accessor.ComponentType = 5123 then // ushort/Word
+      for i := 0 to High(Result) do
+          Move(binData[offset + i * 2], Result[i], SizeOf(Word))
+   else if accessor.ComponentType = 5125 then // uint/cardinal
+      for i := 0 to High(Result) do
+          Move(binData[offset + i * 4], Result[i], SizeOf(Cardinal))
+   else
+      raise Exception.Create('Unsupported index type')
 end;
 
 function TGLBParser.ReadHeader(stream: TFileStream): TGLBHeader;
@@ -160,12 +231,14 @@ begin
    stream.Read(Result.Length, SizeOf(Result.Length));
 end;
 
-function TGLBParser.ReadChuck(stream: TFileStream): TGLBChunk;
+function TGLBParser.ReadChunk(stream: TFileStream): TGLBChunk;
 begin
    Result := TGLBChunk.Create;
    stream.Read(Result.Length, SizeOf(Result.Length));
-   stream.Read(Result.ChunkType, SizeOf(Result.ChunkType));
-   stream.Read(Result.Data, Result.Length);
+   stream.Read(Result.Typ, SizeOf(Result.Typ));
+
+   SetLength(Result.Data, Result.Length);
+   stream.Read(Result.Data[0], Result.Length);
 end;
 
 { TVertex }
