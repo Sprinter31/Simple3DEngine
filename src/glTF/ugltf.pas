@@ -5,15 +5,21 @@ unit uGLTF;
 interface
 
 uses
-  Classes, SysUtils, fpjson, jsonparser, contnrs, fgl;
+  Classes, SysUtils, fpjson, jsonparser, contnrs, fgl, Dialogs;
 
 type
   TGLBData = class;
 
-  TVertexSingle = class
-        X, Y, Z: Single;
-        constructor Create(aX, aY, aZ: Single);
-      end;
+
+  TVec3 = class
+     X, Y, Z: Single;
+     constructor Create(aX, aY, aZ: Single);
+  end;
+
+  TVec4 = class
+     X, Y, Z, W: Single;
+     constructor Create(aX, aY, aZ, aW: Single);
+  end;
 
   TGLBParser = class
   private
@@ -45,28 +51,59 @@ type
          Primitives: Array of TGLBPrimitive;
       end;
 
+      TGLBAnimationSampler = class
+         Input, Output: Integer;
+         Interpolation: String;
+      end;
+
+      TGLBAnimationTarget = class
+         Node: Integer;
+         Path: String;
+      end;
+
+      TGLBAnimationChannel = class
+         Sampler: Integer;
+         Target: TGLBAnimationTarget;
+      end;
+
+      TGLBAnimation = class
+         Samplers: specialize TArray<TGLBAnimationSampler>;
+         Channels: specialize TArray<TGLBAnimationChannel>;
+      end;
+
       TGLBRoot = class
          BufferViews: Array of TGLBBufferView;
          Accessors: Array of TGLBAccessor;
          Meshes: Array of TGLBMesh;
+         Animations: specialize TArray<TGLBAnimation>;
       end;
 
     function DeserializeJsonToRoot(jsonString: String): TGLBRoot;
     function ReadHeader(stream: TFileStream): TGLBHeader;
     function ReadChunk(stream: TFileStream): TGLBChunk;
-    function ReadVertices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVertexSingle>;
+    function ReadVec3Array(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVec3>;
+    function ReadVec4Array(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVec4>;
+    function ReadSingleArray(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<Single>;
     function ReadIndices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<Integer>;
   public
     function LoadGLB(path: String): TGLBData;
   end;
 
   TVFs = class
-     Vertices: specialize TArray<TVertexSingle>;
+     Vertices: specialize TArray<TVec3>;
      Faces: specialize TArray<Integer>;
+  end;
+
+  TAnimationData = class
+     Times: specialize TArray<Single>;
+     Translations: specialize TArray<TVec3>;
+     Rotations: specialize TArray<TVEC4>;
+     Scales: specialize TArray<TVec3>;
   end;
 
   TGLBData = class
      Meshes: specialize TArray<TVFs>;
+     Animation: TAnimationData;
   end;
 
 implementation
@@ -81,11 +118,15 @@ var
   jsonString: String;
   root: TGLBRoot;
   primitive: TGLBPrimitive;
-  positionAccessor, indexAccessor: TGLBAccessor;
-  positionView, indexView: TGLBBufferView;
+  positionAccessor, indexAccessor, inputAccessor, outputAccessor: TGLBAccessor;
+  positionView, indexView, inputView, outputView: TGLBBufferView;
+  channel: TGLBAnimationChannel;
+  sampler: TGLBAnimationSampler;
   i: Integer;
 begin
    Result := TGLBData.Create;
+   Result.Animation := TAnimationData.Create;
+
    stream := TFileStream.Create(path, fmOpenRead);
    try
       header := ReadHeader(stream);
@@ -107,12 +148,33 @@ begin
           positionView := root.BufferViews[positionAccessor.BufferView];
 
           Result.Meshes[i] := TVFs.Create;
-          Result.Meshes[i].Vertices := ReadVertices(positionAccessor, positionView, binChunk.Data);
+          Result.Meshes[i].Vertices := ReadVec3Array(positionAccessor, positionView, binChunk.Data);
 
           indexAccessor := root.Accessors[primitive.Indices];
           indexView := root.BufferViews[indexAccessor.BufferView];
 
           Result.Meshes[i].Faces := ReadIndices(indexAccessor, indexView, binChunk.Data);
+      end;
+
+      if Length(root.Animations) <= 0 then
+         Exit;
+
+      for channel in root.Animations[0].Channels do begin
+          sampler := root.Animations[0].Samplers[channel.Sampler];
+
+          inputAccessor := root.Accessors[sampler.Input];
+          inputView := root.BufferViews[inputAccessor.BufferView];
+
+          outputAccessor := root.Accessors[sampler.Output];
+          outputView := root.BufferViews[outputAccessor.BufferView];
+
+          Result.Animation.Times := ReadSingleArray(inputAccessor, inputView, binChunk.Data);
+
+          case channel.Target.Path of
+             'translation': Result.Animation.Translations := ReadVec3Array(outputAccessor, outputView, binChunk.Data);
+             'rotation': Result.Animation.Rotations := ReadVec4Array(outputAccessor, outputView, binChunk.Data);
+             'scale': Result.Animation.Scales := ReadVec3Array(outputAccessor, outputView, binChunk.Data);
+          end;
       end;
   finally
     stream.Free;
@@ -123,15 +185,16 @@ function TGLBParser.DeserializeJsonToRoot(jsonString: String): TGLBRoot;
 var
   i, j, k: Integer;
   rootObj, primitiveObj, attributesObj: TJSONObject;
-  bufferViewsArr, accessorsArr, meshesArr, primitiveArray: TJSONArray;
+  bufferViewsArr, accessorsArr, meshesArr, animationsArr, primitiveArray: TJSONArray;
   key: String;
 begin
   Result := TGLBRoot.Create;
   rootObj := TJSONObject(GetJSON(jsonString));
 
   bufferViewsArr := rootObj.Arrays['bufferViews'];
-  accessorsArr   := rootObj.Arrays['accessors'];
-  meshesArr      := rootObj.Arrays['meshes'];
+  accessorsArr  := rootObj.Arrays['accessors'];
+  meshesArr := rootObj.Arrays['meshes'];
+  animationsArr  := rootObj.Arrays['animations'];
 
   { BufferViews }
   SetLength(Result.BufferViews, bufferViewsArr.Count);
@@ -184,11 +247,38 @@ begin
        Result.Meshes[i].Primitives[j].Indices := primitiveObj.Get('indices', 0);
     end;
   end;
+
+  { Animations }
+  SetLength(Result.Animations, animationsArr.Count);
+  for i := 0 to animationsArr.Count - 1 do begin
+     { Samplers }
+     samplersArr := animationsArr.Objects[i].Arrays['samplers'];
+     SetLength(Result.Animations[i].Samplers, samplersArr.Count);
+
+     for j := 0 to samplersArr.Count - 1 do begin
+        Result.Animations[i].Samplers[j] := TGLBAnimationSampler.Create;
+        Result.Animations[i].Samplers[j].Input := samplersArr.Objects[j].Get('input', 0);
+        Result.Animations[i].Samplers[j].Output := samplersArr.Objects[j].Get('output', 0);
+        Result.Animations[i].Samplers[j].Interpolation := samplersArr.Objects[j].Get('interpolation', 'LINEAR');
+     end;
+
+     { Channels }
+     channelsArr := animationsArr.Objects[i].Arrays['channels'];
+     SetLength(Result.Animations[i].Channels, channelsArr.Count);
+
+     for j := 0 to animationsArr.Count - 1 do begin
+        Result.Animations[i].Channels[j] := TGLBAnimationChannel.Create;
+        Result.Animations[i].Channels[j].Sampler := channelsArr.Objects[j].Get('sampler', 0);
+        Result.Animations[i].Channels[j].Target := TGLBAnimationTarget.Create;
+        Result.Animations[i].Channels[j].Target.Node := channelsArr.Objects[j].Get('target', 0);
+        Result.Animations[i].Channels[j].Target.Path := channelsArr.Objects[j].Get('path', 0);
+     end;
+  end;
 end;
 
-function TGLBParser.ReadVertices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVertexSingle>;
+function TGLBParser.ReadVec3Array(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVec3>;
 var
-  vertices: specialize TArray<TVertexSingle>;
+  vertices: specialize TArray<TVec3>;
   offset, baseOffset: Integer;
   x, y, z: Single;
   i: Integer;
@@ -197,7 +287,7 @@ begin
       raise Exception.Create('POSITION is not single');
 
    if accessor.Typ <> 'VEC3' then
-      raise Exception.Create('POSITION is not VEC3 (Vector3)');
+      raise Exception.Create('POSITION is not VEC3');
 
    offset := accessor.ByteOffset + view.ByteOffset;
    SetLength(vertices, accessor.Count);
@@ -209,10 +299,51 @@ begin
      Move(binData[baseOffset + 4], y, SizeOf(Single));
      Move(binData[baseOffset + 8], z, SizeOf(Single));
 
-     vertices[i] := TVertexSingle.Create(x, y, z);
+     vertices[i] := TVec3.Create(x, y, z);
    end;
 
    Result := vertices;
+end;
+
+function TGLBParser.ReadVec4Array(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVec4>;
+var
+  rotations: specialize TArray<TVec4>;
+  offset, baseOffset: Integer;
+  x, y, z, w: Single;
+  i: Integer;
+begin
+   if accessor.ComponentType <> 5126 then
+      raise Exception.Create('POSITION is not single');
+
+   if accessor.Typ <> 'VEC4' then
+      raise Exception.Create('POSITION is not VEC4');
+
+   offset := accessor.ByteOffset + view.ByteOffset;
+   SetLength(rotations, accessor.Count);
+
+   for i := 0 to High(rotations) do begin
+     baseOffset := offset + i * 16; // 4 singles = 16 bytes
+
+     Move(binData[baseOffset], x, SizeOf(Single));
+     Move(binData[baseOffset + 4], y, SizeOf(Single));
+     Move(binData[baseOffset + 8], z, SizeOf(Single));
+     Move(binData[baseOffset + 12], w, SizeOf(Single));
+
+     rotations[i] := TVec4.Create(x, y, z, w);
+   end;
+
+   Result := rotations;
+end;
+
+function TGLBParser.ReadSingleArray(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<Single>;
+var
+  offset, i: Integer;
+begin
+   offset := view.ByteOffset + accessor.ByteOffset;
+   SetLength(Result, accessor.Count);
+
+   for i := 0 to accessor.Count - 1 do
+       Move(binData[offset + i * 4], Result[i], SizeOf(single));
 end;
 
 function TGLBParser.ReadIndices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<Integer>;
@@ -250,13 +381,23 @@ begin
    stream.Read(Result.Data[0], Result.Length);
 end;
 
-{ TVertex }
+{ TVec3 }
 
-constructor TVertexSingle.Create(aX, aY, aZ: Single);
+constructor TVec3.Create(aX, aY, aZ: Single);
 begin
    X := aX;
    Y := aY;
    Z := aZ;
+end;
+
+{ TVec4 }
+
+constructor TVec4.Create(aX, aY, aZ, aW: Single);
+begin
+   X := aX;
+   Y := aY;
+   Z := aZ;
+   W := aW;
 end;
 
 end.

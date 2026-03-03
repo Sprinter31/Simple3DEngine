@@ -44,7 +44,7 @@ var
   parser: TGLBParser;
 begin
   parser := TGLBParser.Create;
-  data := parser.LoadGLB('C:\Users\Leo\Downloads\surtrlaevatain_-_colorful_wonderland.glb');
+  data := parser.LoadGLB('C:\Users\Leo\Downloads\gltfglb_magic_wand_animation.glb');
 
   FCurAnimationIndex := 0;
   FRenderer := TRenderer.Create(DisplayCanvas.Width, DisplayCanvas.Height);

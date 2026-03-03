@@ -31,7 +31,7 @@ begin
       SetLength(mesh.Vertices, Length(mesh.Vertices) + Length(data.Meshes[i].Vertices));
       vertexOffset := Length(mesh.Vertices) - Length(data.Meshes[i].Vertices);
       for j := 0 to High(data.Meshes[i].Vertices) do
-          mesh.Vertices[vertexOffset + j] := TVertex.Create(data.Meshes[i].Vertices[j].X, data.Meshes[i].Vertices[j].Y - 1, data.Meshes[i].Vertices[j].Z + 50);
+          mesh.Vertices[vertexOffset + j] := TVertex.Create(data.Meshes[i].Vertices[j].X, data.Meshes[i].Vertices[j].Y * -1, data.Meshes[i].Vertices[j].Z * -1);
 
       lineOffset := Length(mesh.Lines);
       SetLength(mesh.Lines, lineOffset + Length(data.Meshes[i].Faces));
@@ -45,7 +45,6 @@ begin
          mesh.Lines[lineOffset + j * 3 + 2] := TLine.Create(c, a);
       end;
    end;
-
 
    SetLength(FMeshStates, 1);
    FMeshStates[0] := mesh;

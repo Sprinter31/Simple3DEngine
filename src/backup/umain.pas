@@ -44,7 +44,7 @@ var
   parser: TGLBParser;
 begin
   parser := TGLBParser.Create;
-  data := parser.LoadGLB('C:\Users\Leo\Downloads\henry_waternoose_monsters_inc.glb');
+  data := parser.LoadGLB('C:\Users\Leo\Downloads\Untitled.glb');
 
   FCurAnimationIndex := 0;
   FRenderer := TRenderer.Create(DisplayCanvas.Width, DisplayCanvas.Height);
