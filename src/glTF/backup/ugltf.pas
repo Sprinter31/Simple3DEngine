@@ -5,7 +5,7 @@ unit uGLTF;
 interface
 
 uses
-  Classes, SysUtils, fpjson, jsonparser, contnrs, fgl, Dialogs;
+  Classes, SysUtils, fpjson, jsonparser, fgl;
 
 type
   TGLBData = class;
@@ -95,10 +95,12 @@ type
   end;
 
   TAnimationData = class
-     Times: specialize TArray<Single>;
      Translations: specialize TArray<TVec3>;
+     TranslationTimes: specialize TArray<Single>;
      Rotations: specialize TArray<TVEC4>;
+     RotationTimes: specialize TArray<Single>;
      Scales: specialize TArray<TVec3>;
+     ScaleTimes: specialize TArray<Single>;
   end;
 
   TGLBData = class
@@ -168,12 +170,21 @@ begin
           outputAccessor := root.Accessors[sampler.Output];
           outputView := root.BufferViews[outputAccessor.BufferView];
 
-          Result.Animation.Times := ReadSingleArray(inputAccessor, inputView, binChunk.Data);
+
 
           case channel.Target.Path of
-             'translation': Result.Animation.Translations := ReadVec3Array(outputAccessor, outputView, binChunk.Data);
-             'rotation': Result.Animation.Rotations := ReadVec4Array(outputAccessor, outputView, binChunk.Data);
-             'scale': Result.Animation.Scales := ReadVec3Array(outputAccessor, outputView, binChunk.Data);
+             'translation': begin
+                Result.Animation.Translations := ReadVec3Array(outputAccessor, outputView, binChunk.Data);
+                Result.Animation.TranslationTimes := ReadSingleArray(inputAccessor, inputView, binChunk.Data);
+             end;
+             'rotation': begin
+                Result.Animation.Rotations := ReadVec4Array(outputAccessor, outputView, binChunk.Data);
+                Result.Animation.RotationTimes := ReadSingleArray(inputAccessor, inputView, binChunk.Data);
+             end;
+             'scale': begin
+                Result.Animation.Scales := ReadVec3Array(outputAccessor, outputView, binChunk.Data);
+                Result.Animation.ScaleTimes := ReadSingleArray(inputAccessor, inputView, binChunk.Data);
+             end;
           end;
       end;
   finally
@@ -184,8 +195,8 @@ end;
 function TGLBParser.DeserializeJsonToRoot(jsonString: String): TGLBRoot;
 var
   i, j, k: Integer;
-  rootObj, primitiveObj, attributesObj: TJSONObject;
-  bufferViewsArr, accessorsArr, meshesArr, animationsArr, primitiveArray: TJSONArray;
+  rootObj, primitiveObj, attributesObj, targetObj: TJSONObject;
+  bufferViewsArr, accessorsArr, meshesArr, animationsArr, primitiveArray, samplersArr, channelsArr: TJSONArray;
   key: String;
 begin
   Result := TGLBRoot.Create;
@@ -249,7 +260,35 @@ begin
   end;
 
   { Animations }
-  SetLength(Result.Animations);
+  SetLength(Result.Animations, animationsArr.Count);
+  for i := 0 to animationsArr.Count - 1 do begin
+     Result.Animations[i] := TGLBAnimation.Create;
+
+     { Samplers }
+     samplersArr := animationsArr.Objects[i].Arrays['samplers'];
+     SetLength(Result.Animations[i].Samplers, samplersArr.Count);
+
+     for j := 0 to samplersArr.Count - 1 do begin
+        Result.Animations[i].Samplers[j] := TGLBAnimationSampler.Create;
+        Result.Animations[i].Samplers[j].Input := samplersArr.Objects[j].Get('input', 0);
+        Result.Animations[i].Samplers[j].Output := samplersArr.Objects[j].Get('output', 0);
+        Result.Animations[i].Samplers[j].Interpolation := samplersArr.Objects[j].Get('interpolation', 'LINEAR');
+     end;
+
+     { Channels }
+     channelsArr := animationsArr.Objects[i].Arrays['channels'];
+     SetLength(Result.Animations[i].Channels, channelsArr.Count);
+
+     for j := 0 to channelsArr.Count - 1 do begin
+        Result.Animations[i].Channels[j] := TGLBAnimationChannel.Create;
+        Result.Animations[i].Channels[j].Sampler := channelsArr.Objects[j].Get('sampler', 0);
+
+        targetObj := channelsArr.Objects[j].Objects['target'];
+        Result.Animations[i].Channels[j].Target := TGLBAnimationTarget.Create;
+        Result.Animations[i].Channels[j].Target.Node := targetObj.Get('target', 0);
+        Result.Animations[i].Channels[j].Target.Path := targetObj.Get('path', '');
+     end;
+  end;
 end;
 
 function TGLBParser.ReadVec3Array(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<TVec3>;
@@ -303,7 +342,7 @@ begin
      Move(binData[baseOffset], x, SizeOf(Single));
      Move(binData[baseOffset + 4], y, SizeOf(Single));
      Move(binData[baseOffset + 8], z, SizeOf(Single));
-     Move(binData[baseOffset + 12], z, SizeOf(Single));
+     Move(binData[baseOffset + 12], w, SizeOf(Single));
 
      rotations[i] := TVec4.Create(x, y, z, w);
    end;

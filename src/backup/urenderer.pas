@@ -77,6 +77,9 @@ begin
    for i := Low(mesh.Lines) to High(mesh.Lines) do begin
       line := mesh.Lines[i];
 
+      line := mesh.Lines[662];
+      line := mesh.Lines[664];
+
       vertexA := mesh.Vertices[line.A];
       vertexB := mesh.Vertices[line.B];
 
@@ -89,7 +92,7 @@ end;
 
 function TRenderer.ProjectTo2D(vertex: TVertex): T2DPoint;
 begin
-  if Abs(vertex.Z < 0.1) then
+  if Abs(vertex.Z) < 0.1 then
     Result := T2DPoint.Create(FScreenWidth*2, FScreenWidth*2) // Außerhalb des Sichtfeldes
   else
     Result := T2DPoint.Create(vertex.X / vertex.Z, vertex.Y / vertex.Z);
