@@ -31,7 +31,24 @@ var
 begin
    frameCount := Max(Max(Length(data.Animation.ScaleTimes), Length(data.Animation.RotationTimes)), Length(data.Animation.TranslationTimes));
 
-   SetLength(FMeshStates, frameCount);
+
+   {for i := 0 to frameCount - 1 do begin
+      for j = 0 to High(data.Nodes) do begin
+
+      end;
+   end; }
+
+
+
+
+
+
+   if frameCount = 0 then begin
+      SetLength(FMeshStates, 1);
+      FMeshStates[0] := ConvertAndCombineMeshes(data.Meshes);
+      Exit;
+   end else SetLength(FMeshStates, frameCount);
+
    for i := 0 to frameCount - 1 do
        FMeshStates[i] := ConvertAndCombineMeshes(data.Meshes);
 
@@ -55,11 +72,12 @@ begin
       SetLength(mesh.Vertices, Length(mesh.Vertices) + Length(meshes[i].Vertices));
       vertexOffset := Length(mesh.Vertices) - Length(meshes[i].Vertices);
       for j := 0 to High(meshes[i].Vertices) do
-          mesh.Vertices[vertexOffset + j] := TVertex.Create(meshes[i].Vertices[j].X, meshes[i].Vertices[j].Y * -1, meshes[i].Vertices[j].Z * -1);
+          mesh.Vertices[vertexOffset + j] := TVertex.Create(meshes[i].Vertices[j].X, meshes[i].Vertices[j].Y - 0.8, meshes[i].Vertices[j].Z + 1);
 
       lineOffset := Length(mesh.Lines);
       SetLength(mesh.Lines, lineOffset + Length(meshes[i].Faces));
-      for j := 0 to (High(meshes[i].Faces) div 3) - 1 do begin
+
+      for j := 0 to (Length(meshes[i].Faces) div 3) - 1 do begin
          a := meshes[i].Faces[j * 3] + vertexOffset;
          b := meshes[i].Faces[j * 3 + 1] + vertexOffset;
          c := meshes[i].Faces[j * 3 + 2] + vertexOffset;

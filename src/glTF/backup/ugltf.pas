@@ -9,7 +9,7 @@ uses
 
 type
   TGLBData = class;
-
+  TGLBNode = class;
 
   TVec3 = class
      X, Y, Z: Single;
@@ -76,6 +76,7 @@ type
          Accessors: Array of TGLBAccessor;
          Meshes: Array of TGLBMesh;
          Animations: specialize TArray<TGLBAnimation>;
+         Nodes: specialize TArray<TGLBNode>;
       end;
 
     function DeserializeJsonToRoot(jsonString: String): TGLBRoot;
@@ -87,6 +88,14 @@ type
     function ReadIndices(accessor: TGLBAccessor; view: TGLBBufferView; binData: TBytes): specialize TArray<Integer>;
   public
     function LoadGLB(path: String): TGLBData;
+  end;
+
+  TGLBNode = class
+     Mesh: Integer;
+     Children: specialize TArray<Integer>;
+     Translation: TVec3;
+     Rotation: TVec4;
+     Scale: TVec3;
   end;
 
   TVFs = class
@@ -106,6 +115,7 @@ type
   TGLBData = class
      Meshes: specialize TArray<TVFs>;
      Animation: TAnimationData;
+     Nodes: specialize TArray<TGLBNode>;
   end;
 
 implementation
@@ -170,8 +180,6 @@ begin
           outputAccessor := root.Accessors[sampler.Output];
           outputView := root.BufferViews[outputAccessor.BufferView];
 
-
-
           case channel.Target.Path of
              'translation': begin
                 Result.Animation.Translations := ReadVec3Array(outputAccessor, outputView, binChunk.Data);
@@ -187,6 +195,8 @@ begin
              end;
           end;
       end;
+
+      Result.Nodes := root.Nodes;
   finally
     stream.Free;
   end;
@@ -195,8 +205,8 @@ end;
 function TGLBParser.DeserializeJsonToRoot(jsonString: String): TGLBRoot;
 var
   i, j, k: Integer;
-  rootObj, primitiveObj, attributesObj, targetObj: TJSONObject;
-  bufferViewsArr, accessorsArr, meshesArr, animationsArr, primitiveArray, samplersArr, channelsArr: TJSONArray;
+  rootObj, primitiveObj, attributesObj, targetObj, nodeObj: TJSONObject;
+  bufferViewsArr, accessorsArr, meshesArr, animationsArr, primitiveArray, samplersArr, channelsArr, nodesArr, childrenArr, floatsArr: TJSONArray;
   key: String;
 begin
   Result := TGLBRoot.Create;
@@ -205,7 +215,9 @@ begin
   bufferViewsArr := rootObj.Arrays['bufferViews'];
   accessorsArr  := rootObj.Arrays['accessors'];
   meshesArr := rootObj.Arrays['meshes'];
-  animationsArr  := rootObj.Arrays['animations'];
+  if rootObj.Find('animations') <> Nil then
+     animationsArr := rootObj.Arrays['animations'];
+  nodesArr := rootObj.Arrays['nodes'];
 
   { BufferViews }
   SetLength(Result.BufferViews, bufferViewsArr.Count);
@@ -285,8 +297,46 @@ begin
 
         targetObj := channelsArr.Objects[j].Objects['target'];
         Result.Animations[i].Channels[j].Target := TGLBAnimationTarget.Create;
-        Result.Animations[i].Channels[j].Target.Node := targetObj.Get('target', 0);
+        Result.Animations[i].Channels[j].Target.Node := targetObj.Get('node', 0);
         Result.Animations[i].Channels[j].Target.Path := targetObj.Get('path', '');
+     end;
+  end;
+
+  { Nodes }
+  SetLength(Result.Nodes, nodesArr.Count);
+  for i := 0 to nodesArr.Count - 1 do begin
+     nodeObj := nodesArr.Objects[i];
+     Result.Nodes[i] := TGLBNode.Create;
+     Result.Nodes[i].Mesh := nodeObj.Get('mesh', -1);
+
+     { Children }
+     if nodeObj.Find('children') <> Nil then begin
+        childrenArr := nodeObj.Arrays['children'];
+        SetLength(Result.Nodes[i].Children, childrenArr.Count);
+
+        for j := 0 to childrenArr.Count - 1 do
+            Result.Nodes[i].Children[j] := childrenArr.Integers[j];
+     end;
+
+     { Translation }
+     if nodeObj.Find('translation') <> Nil then begin
+        floatsArr := nodeObj.Arrays['translation'];
+        if floatsArr.Count >= 3 then
+           Result.Nodes[i].Translation := TVec3.Create(floatsArr.Floats[0], floatsArr.Floats[1], floatsArr.Floats[2]);
+     end;
+
+     { Rotation }
+     if nodeObj.Find('rotation') <> Nil then begin
+        floatsArr := nodeObj.Arrays['rotation'];
+        if floatsArr.Count >= 4 then
+           Result.Nodes[i].Rotation := TVec4.Create(floatsArr.Floats[0], floatsArr.Floats[1], floatsArr.Floats[2], floatsArr.Floats[3]);
+     end;
+
+     { Scale }
+     if nodeObj.Find('scale') <> Nil then begin
+        floatsArr := nodeObj.Arrays['scale'];
+        if floatsArr.Count >= 3 then
+           Result.Nodes[i].Scale := TVec3.Create(floatsArr.Floats[0], floatsArr.Floats[1], floatsArr.Floats[2]);
      end;
   end;
 end;
