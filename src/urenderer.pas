@@ -60,10 +60,8 @@ begin
   Result.Canvas.Pen.Color := clGreen;
   Result.Canvas.Pen.Width := 1;
 
-  for line in RenderLines(mesh) do begin
-
+  for line in RenderLines(mesh) do
      Result.Canvas.Line(Round(line.A.X), Round(line.A.Y), Round(line.B.X), Round(line.B.Y));
-  end;
 end;
 
 function TRenderer.RenderLines(mesh: TMesh): T2DLineArray;
@@ -88,11 +86,13 @@ begin
 end;
 
 function TRenderer.ProjectTo2D(vertex: TVertex): T2DPoint;
+var z: Double;
 begin
-  if Abs(vertex.Z) < 0.1 then
+  z := vertex.Z + 5;
+  if Abs(z) < 0.1 then
     Result := T2DPoint.Create(FScreenWidth*2, FScreenWidth*2) // Außerhalb des Sichtfeldes
   else
-    Result := T2DPoint.Create(vertex.X / vertex.Z, vertex.Y / vertex.Z);
+    Result := T2DPoint.Create(vertex.X / z, (vertex.Y) / z);
 end;
 
 function TRenderer.TranslateToScreen(p: T2DPoint): T2DPoint;

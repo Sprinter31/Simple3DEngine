@@ -5,7 +5,8 @@ unit uMain;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, uMesh, uAnimation, uRenderer, uGLTF;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Menus, uMesh,
+  uAnimation, uRenderer, uGLTF;
 
 type
 
@@ -13,17 +14,24 @@ type
 
   TMainForm = class(TForm)
     DisplayCanvas: TPaintBox;
+    FileDialog: TOpenDialog;
+    TopBar: TMainMenu;
+    MiLoadFile: TMenuItem;
+    MiExit: TMenuItem;
     PaintTimer: TTimer;
     procedure DisplayCanvas_Paint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure Form_Destroy(Sender: TObject);
+    procedure MiExitClick(Sender: TObject);
+    procedure MiLoadFileClick(Sender: TObject);
     procedure PaintTimer_Tick(Sender: TObject);
   private
     FCurBitmap: TBitmap;
     FAnimation: TAnimation;
     FCurAnimationIndex: Integer;
     FRenderer: TRenderer;
+    FFileParser: TGLBParser;
   public
 
   end;
@@ -40,11 +48,11 @@ implementation
 procedure TMainForm.FormCreate(Sender: TObject);
 var
   data: TGLBData;
-  i: Integer;
-  parser: TGLBParser;
 begin
-  parser := TGLBParser.Create;
-  data := parser.LoadGLB('C:\Users\Leo\Downloads\ikonik_breakdance_fortnite_3d_model.glb');
+   FileDialog.InitialDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Models';
+
+  FFileParser := TGLBParser.Create;
+  data := FFileParser.LoadGLB('.\Models\cube.glb');
 
   FCurAnimationIndex := 0;
   FRenderer := TRenderer.Create(DisplayCanvas.Width, DisplayCanvas.Height);
@@ -87,6 +95,29 @@ begin
   FCurBitmap.Free;
   FAnimation.Free;
   FRenderer.Free;
+end;
+
+procedure TMainForm.MiExitClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TMainForm.MiLoadFileClick(Sender: TObject);
+var data: TGLBData;
+begin
+   PaintTimer.Enabled := False;
+
+   if FileDialog.Execute then begin
+      data := FFileParser.LoadGLB(FileDialog.FileName);
+      FCurAnimationIndex := 0;
+      FAnimation.Free;
+
+      FAnimation := TAnimation.Create(data);
+      FCurBitmap.Free;
+      FCurBitmap := FRenderer.RenderMesh(FAnimation.States[FCurAnimationIndex]);
+   end;
+
+   PaintTimer.Enabled := True;
 end;
 
 end.

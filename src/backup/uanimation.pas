@@ -12,13 +12,12 @@ type
     private
       FMeshStates: specialize TArray<TMesh>;
       function ConvertAndCombineMeshes(meshes: specialize TArray<TVFs>): TMesh;
-      function ApplyTranslation(mesh: TMesh; translation: TVec3): TMesh;
       function ApplyRotation(mesh: TMesh; rotation: TVec4): TMesh;
-      function ApplyScale(mesh: TMesh; scale: TVec3): TMesh;
       function Cross(a, b: TVec3): TVec3;
     public
       constructor Create(data: TGLBData);
       property States: specialize TArray<TMesh> read FMeshStates;
+      destructor Destroy; override;
   end;
 
 implementation
@@ -28,38 +27,22 @@ implementation
 constructor TAnimation.Create(data: TGLBData);
 var
   i, frameCount: Integer;
+  quaternion: TVec4;
+  baseMesh: TMesh;
 begin
-   frameCount := Max(Max(Length(data.Animation.ScaleTimes), Length(data.Animation.RotationTimes)), Length(data.Animation.TranslationTimes));
+   frameCount := 60;
+   SetLength(FMeshStates, frameCount);
 
+   baseMesh := ConvertAndCombineMeshes(data.Meshes);
+   try
+     for i := 0 to frameCount - 1 do begin
+         quaternion := TVec4.Create(0, Sin(((i / frameCount) * 2 * Pi) / 2), 0, Cos(((i / frameCount) * 2 * Pi) / 2));
 
-   {for i := 0 to frameCount - 1 do begin
-      for j = 0 to High(data.Nodes) do begin
-
-      end;
-   end; }
-
-
-
-
-
-
-   if frameCount = 0 then begin
-      SetLength(FMeshStates, 1);
-      FMeshStates[0] := ConvertAndCombineMeshes(data.Meshes);
-      Exit;
-   end else SetLength(FMeshStates, frameCount);
-
-   for i := 0 to frameCount - 1 do
-       FMeshStates[i] := ConvertAndCombineMeshes(data.Meshes);
-
-   for i := 0 to High(data.Animation.ScaleTimes) do
-       FMeshStates[i] := ApplyScale(FMeshStates[i], data.Animation.Scales[i]);
-
-   for i := 0 to High(data.Animation.RotationTimes) do
-       FMeshStates[i] := ApplyRotation(FMeshStates[i], data.Animation.Rotations[i]);
-
-   for i := 0 to High(data.Animation.TranslationTimes) do
-       FMeshStates[i] := ApplyTranslation(FMeshStates[i], data.Animation.Translations[i]);
+         FMeshStates[i] := ApplyRotation(baseMesh, quaternion);
+       end;
+   finally
+     baseMesh.Free;
+   end;
 end;
 
 function TAnimation.ConvertAndCombineMeshes(meshes: specialize TArray<TVFs>): TMesh;
@@ -72,7 +55,7 @@ begin
       SetLength(mesh.Vertices, Length(mesh.Vertices) + Length(meshes[i].Vertices));
       vertexOffset := Length(mesh.Vertices) - Length(meshes[i].Vertices);
       for j := 0 to High(meshes[i].Vertices) do
-          mesh.Vertices[vertexOffset + j] := TVertex.Create(meshes[i].Vertices[j].X, meshes[i].Vertices[j].Y - 0.8, meshes[i].Vertices[j].Z + 1);
+          mesh.Vertices[vertexOffset + j] := TVertex.Create(meshes[i].Vertices[j].X, meshes[i].Vertices[j].Y, meshes[i].Vertices[j].Z);
 
       lineOffset := Length(mesh.Lines);
       SetLength(mesh.Lines, lineOffset + Length(meshes[i].Faces));
@@ -88,17 +71,6 @@ begin
       end;
    end;
    Result := mesh;
-end;
-
-function TAnimation.ApplyTranslation(mesh: TMesh; translation: TVec3): TMesh;
-var i: Integer;
-begin
-   Result := mesh.Clone;
-   for i := 0 to High(mesh.Vertices) do begin
-       Result.Vertices[i].X := Result.Vertices[i].X + translation.X;
-       Result.Vertices[i].Y := Result.Vertices[i].Y + translation.Y;
-       Result.Vertices[i].Z := Result.Vertices[i].Z + translation.Z;
-   end;
 end;
 
 function TAnimation.ApplyRotation(mesh: TMesh; rotation: TVec4): TMesh;
@@ -124,17 +96,6 @@ begin
    end;
 end;
 
-function TAnimation.ApplyScale(mesh: TMesh; scale: TVec3): TMesh;
-var i: Integer;
-begin
-   Result := mesh.Clone;
-   for i := 0 to High(mesh.Vertices) do begin
-       Result.Vertices[i].X := Result.Vertices[i].X * scale.X;
-       Result.Vertices[i].Y := Result.Vertices[i].Y * scale.Y;
-       Result.Vertices[i].Z := Result.Vertices[i].Z * scale.Z;
-   end;
-end;
-
 function TAnimation.Cross(a, b: TVec3): TVec3;
 begin
   Result := TVec3.Create(
@@ -142,6 +103,16 @@ begin
     a.Z * b.X - a.X * b.Z,
     a.X * b.Y - a.Y * b.X
   );
+end;
+
+destructor TAnimation.Destroy;
+var
+  i: Integer;
+begin
+  for i := 0 to High(FMeshStates) do
+    FMeshStates[i].Free;
+
+  inherited Destroy;
 end;
 
 end.

@@ -1,18 +1,19 @@
 object MainForm: TMainForm
-  Left = 256
-  Height = 1000
-  Top = 250
+  Left = 1131
+  Height = 980
+  Top = 103
   Width = 1000
   Caption = 'Simple3DEngine'
-  ClientHeight = 1000
+  ClientHeight = 980
   ClientWidth = 1000
+  Menu = TopBar
   LCLVersion = '4.6.0.0'
   OnCreate = FormCreate
   OnResize = FormResize
   object DisplayCanvas: TPaintBox
     Left = 0
     Height = 530
-    Top = 0
+    Top = -5
     Width = 741
     Anchors = []
     Color = clBlack
@@ -21,9 +22,26 @@ object MainForm: TMainForm
   end
   object PaintTimer: TTimer
     Enabled = False
-    Interval = 16
+    Interval = 33
     OnTimer = PaintTimer_Tick
     Left = 10
     Top = 10
+  end
+  object TopBar: TMainMenu
+    Left = 8
+    Top = 8
+    object MiLoadFile: TMenuItem
+      Caption = 'Load model'
+      OnClick = MiLoadFileClick
+    end
+    object MiExit: TMenuItem
+      Caption = 'Exit'
+      OnClick = MiExitClick
+    end
+  end
+  object FileDialog: TOpenDialog
+    Filter = 'GLB Dateien (*.glb)|*.glb|Alle Dateien (*.*)|*.*'
+    Left = 8
+    Top = 8
   end
 end

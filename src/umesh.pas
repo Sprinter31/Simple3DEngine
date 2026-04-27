@@ -17,6 +17,7 @@ type
       Vertices: TVertexArray;
       constructor Create;
       function Clone: TMesh;
+      destructor Destroy; override;
   end;
 
   TLine = class
@@ -36,31 +37,43 @@ implementation
 
 constructor TMesh.Create;
 begin
-  {SetLength(FVertices, 4);
-  FVertices[0] := TVertex.Create(-0.8, 0.8, 2);
-  FVertices[1] := TVertex.Create(0.8, 0.8, 2);
-  FVertices[2] := TVertex.Create(0.8, -0.8, 2);
-  FVertices[3] := TVertex.Create(-0.8, -0.8, 2);
 
-  SetLength(FLines, 4);
-  FLines[0] := TLine.Create(0, 1);
-  FLines[1] := TLine.Create(1, 2);
-  FLines[2] := TLine.Create(2, 3);
-  FLines[3] := TLine.Create(3, 0);}
 end;
 
 function TMesh.Clone: TMesh;
-var i: Integer;
+var
+  i: Integer;
 begin
   Result := TMesh.Create;
+
   SetLength(Result.Vertices, Length(Vertices));
   SetLength(Result.Lines, Length(Lines));
 
-  for i := 0 to High(Result.Vertices) do
-        Result.Vertices[i] := Vertices[i];
+  for i := 0 to High(Vertices) do
+    Result.Vertices[i] := TVertex.Create(
+      Vertices[i].X,
+      Vertices[i].Y,
+      Vertices[i].Z
+    );
 
-  for i := 0 to High(Result.Lines) do
-        Result.Lines[i] := Lines[i];
+  for i := 0 to High(Lines) do
+    Result.Lines[i] := TLine.Create(
+      Lines[i].A,
+      Lines[i].B
+    );
+end;
+
+destructor TMesh.Destroy;
+var
+  i: Integer;
+begin
+  for i := 0 to High(Vertices) do
+    Vertices[i].Free;
+
+  for i := 0 to High(Lines) do
+    Lines[i].Free;
+
+  inherited Destroy;
 end;
 
 { TLine }
