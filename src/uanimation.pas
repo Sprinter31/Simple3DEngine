@@ -31,11 +31,14 @@ var
   baseMesh: TMesh;
 begin
    frameCount := 60;
+   // Speichert alle vorberechneten Animationsbilder
    SetLength(FMeshStates, frameCount);
 
+   // Erstellt aus allen Teilmeshes ein gemeinsames Drahtgitter
    baseMesh := ConvertAndCombineMeshes(data.Meshes);
    try
      for i := 0 to frameCount - 1 do begin
+         // Berechnet für jedes Bild eine neue Drehung
          quaternion := TVec4.Create(0, Sin(((i / frameCount) * 2 * Pi) / 2), 0, Cos(((i / frameCount) * 2 * Pi) / 2));
 
          FMeshStates[i] := ApplyRotation(baseMesh, quaternion);
@@ -52,6 +55,7 @@ var
 begin
    mesh := TMesh.Create;
    for i := 0 to High(meshes) do begin
+      // Hängt die Vertices des aktuellen Teilmodells an
       SetLength(mesh.Vertices, Length(mesh.Vertices) + Length(meshes[i].Vertices));
       vertexOffset := Length(mesh.Vertices) - Length(meshes[i].Vertices);
       for j := 0 to High(meshes[i].Vertices) do
@@ -60,6 +64,7 @@ begin
       lineOffset := Length(mesh.Lines);
       SetLength(mesh.Lines, lineOffset + Length(meshes[i].Faces));
 
+      // Wandelt jedes Dreieck in drei Kanten um
       for j := 0 to (Length(meshes[i].Faces) div 3) - 1 do begin
          a := meshes[i].Faces[j * 3] + vertexOffset;
          b := meshes[i].Faces[j * 3 + 1] + vertexOffset;
@@ -81,10 +86,12 @@ var
   i: Integer;
 begin
    Result := mesh.Clone;
+   // Nutzt den Vektoranteil und den Skalarteil des Quaternions
    quaternionVectorPart := TVec3.Create(rotation.X, rotation.Y, rotation.Z);
    quaternionScalarPart := rotation.W;
 
    for i := 0 to High(mesh.Vertices) do begin
+       // Dreht jeden Punkt mit der Quaternion-Formel
        firstCross := Cross(quaternionVectorPart, TVec3.Create(Result.Vertices[i].X, Result.Vertices[i].Y, Result.Vertices[i].Z));
        secondCross := Cross(quaternionVectorPart, firstCross);
 
@@ -98,6 +105,7 @@ end;
 
 function TAnimation.Cross(a, b: TVec3): TVec3;
 begin
+  // Kreuzprodukt von zwei 3D-Vektoren
   Result := TVec3.Create(
     a.Y * b.Z - a.Z * b.Y,
     a.Z * b.X - a.X * b.Z,
@@ -110,6 +118,7 @@ var
   i: Integer;
 begin
   for i := 0 to High(FMeshStates) do
+    // Gibt alle vorberechneten Mesh-Zustaende frei
     FMeshStates[i].Free;
 
   inherited Destroy;

@@ -26,7 +26,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uMesh"/>
         <EditorIndex Value="4"/>
-        <CursorPos X="16" Y="23"/>
+        <CursorPos X="33" Y="77"/>
         <UsageCount Value="71"/>
         <Loaded Value="True"/>
       </Unit>
@@ -42,9 +42,8 @@
         <Filename Value="src\urenderer.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uRenderer"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <CursorPos X="3" Y="12"/>
+        <CursorPos X="49" Y="106"/>
         <UsageCount Value="70"/>
         <Loaded Value="True"/>
       </Unit>
@@ -52,8 +51,8 @@
         <Filename Value="src\glTF\ugltf.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uGLTF"/>
-        <TopLine Value="418"/>
-        <CursorPos Y="471"/>
+        <TopLine Value="419"/>
+        <CursorPos X="48" Y="90"/>
         <UsageCount Value="60"/>
         <Loaded Value="True"/>
       </Unit>
@@ -64,8 +63,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uMain"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="56"/>
-        <CursorPos X="20" Y="98"/>
+        <TopLine Value="79"/>
+        <CursorPos X="12" Y="118"/>
         <UsageCount Value="29"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -104,9 +103,10 @@
       <Unit>
         <Filename Value="src\uanimation.pas"/>
         <UnitName Value="uAnimation"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="7"/>
-        <CursorPos X="6" Y="42"/>
+        <TopLine Value="75"/>
+        <CursorPos X="22" Y="124"/>
         <UsageCount Value="30"/>
         <Loaded Value="True"/>
       </Unit>

@@ -139,6 +139,7 @@ begin
    Result := TGLBData.Create;
    Result.Animation := TAnimationData.Create;
 
+   // Oeffnet die GLB-Datei im Lesemodus
    stream := TFileStream.Create(path, fmOpenRead);
    try
       header := ReadHeader(stream);
@@ -149,11 +150,13 @@ begin
       jsonChunk := ReadChunk(stream);
       binChunk := ReadChunk(stream);
 
+      // JSON-Teil enthaelt die Struktur der Datei
       SetString(jsonString, PAnsiChar(@jsonChunk.Data[0]), Length(jsonChunk.Data));
       root := DeserializeJsonToRoot(jsonString);
 
       SetLength(Result.Meshes, Length(root.Meshes));
       for i := 0 to High(root.Meshes) do begin
+          // Nutzt das erste Primitive des aktuellen Meshes
           primitive := root.Meshes[i].Primitives[0];
 
           positionAccessor := root.Accessors[primitive.Attributes['POSITION']];
@@ -171,6 +174,7 @@ begin
       if Length(root.Animations) <= 0 then
          Exit;
 
+      // Liest die Animationsdaten aus dem ersten Animationsblock
       for channel in root.Animations[0].Channels do begin
           sampler := root.Animations[0].Samplers[channel.Sampler];
 
@@ -210,13 +214,12 @@ var
   key: String;
 begin
   Result := TGLBRoot.Create;
+  // Liest den JSON-Text der GLB-Datei als Objektbaum ein
   rootObj := TJSONObject(GetJSON(jsonString));
 
   bufferViewsArr := rootObj.Arrays['bufferViews'];
   accessorsArr  := rootObj.Arrays['accessors'];
   meshesArr := rootObj.Arrays['meshes'];
-  if rootObj.Find('animations') <> Nil then
-     animationsArr := rootObj.Arrays['animations'];
   nodesArr := rootObj.Arrays['nodes'];
 
   { BufferViews }
@@ -272,34 +275,38 @@ begin
   end;
 
   { Animations }
-  SetLength(Result.Animations, animationsArr.Count);
-  for i := 0 to animationsArr.Count - 1 do begin
-     Result.Animations[i] := TGLBAnimation.Create;
+  if rootObj.Find('animations') <> Nil then begin
+    animationsArr := rootObj.Arrays['animations'];
 
-     { Samplers }
-     samplersArr := animationsArr.Objects[i].Arrays['samplers'];
-     SetLength(Result.Animations[i].Samplers, samplersArr.Count);
+    SetLength(Result.Animations, animationsArr.Count);
+    for i := 0 to animationsArr.Count - 1 do begin
+       Result.Animations[i] := TGLBAnimation.Create;
 
-     for j := 0 to samplersArr.Count - 1 do begin
-        Result.Animations[i].Samplers[j] := TGLBAnimationSampler.Create;
-        Result.Animations[i].Samplers[j].Input := samplersArr.Objects[j].Get('input', 0);
-        Result.Animations[i].Samplers[j].Output := samplersArr.Objects[j].Get('output', 0);
-        Result.Animations[i].Samplers[j].Interpolation := samplersArr.Objects[j].Get('interpolation', 'LINEAR');
-     end;
+       { Samplers }
+       samplersArr := animationsArr.Objects[i].Arrays['samplers'];
+       SetLength(Result.Animations[i].Samplers, samplersArr.Count);
 
-     { Channels }
-     channelsArr := animationsArr.Objects[i].Arrays['channels'];
-     SetLength(Result.Animations[i].Channels, channelsArr.Count);
+       for j := 0 to samplersArr.Count - 1 do begin
+          Result.Animations[i].Samplers[j] := TGLBAnimationSampler.Create;
+          Result.Animations[i].Samplers[j].Input := samplersArr.Objects[j].Get('input', 0);
+          Result.Animations[i].Samplers[j].Output := samplersArr.Objects[j].Get('output', 0);
+          Result.Animations[i].Samplers[j].Interpolation := samplersArr.Objects[j].Get('interpolation', 'LINEAR');
+       end;
 
-     for j := 0 to channelsArr.Count - 1 do begin
-        Result.Animations[i].Channels[j] := TGLBAnimationChannel.Create;
-        Result.Animations[i].Channels[j].Sampler := channelsArr.Objects[j].Get('sampler', 0);
+       { Channels }
+       channelsArr := animationsArr.Objects[i].Arrays['channels'];
+       SetLength(Result.Animations[i].Channels, channelsArr.Count);
 
-        targetObj := channelsArr.Objects[j].Objects['target'];
-        Result.Animations[i].Channels[j].Target := TGLBAnimationTarget.Create;
-        Result.Animations[i].Channels[j].Target.Node := targetObj.Get('node', 0);
-        Result.Animations[i].Channels[j].Target.Path := targetObj.Get('path', '');
-     end;
+       for j := 0 to channelsArr.Count - 1 do begin
+          Result.Animations[i].Channels[j] := TGLBAnimationChannel.Create;
+          Result.Animations[i].Channels[j].Sampler := channelsArr.Objects[j].Get('sampler', 0);
+
+          targetObj := channelsArr.Objects[j].Objects['target'];
+          Result.Animations[i].Channels[j].Target := TGLBAnimationTarget.Create;
+          Result.Animations[i].Channels[j].Target.Node := targetObj.Get('node', 0);
+          Result.Animations[i].Channels[j].Target.Path := targetObj.Get('path', '');
+       end;
+    end;
   end;
 
   { Nodes }
@@ -358,6 +365,7 @@ begin
    SetLength(vertices, accessor.Count);
 
    for i := 0 to High(vertices) do begin
+     // Ein VEC3 besteht aus drei Single-Werten
      baseOffset := offset + i * 12; // 3 singles = 12 bytes
 
      Move(binData[baseOffset], x, SizeOf(Single));
@@ -387,6 +395,7 @@ begin
    SetLength(rotations, accessor.Count);
 
    for i := 0 to High(rotations) do begin
+     // Ein VEC4 besteht aus vier Single-Werten
      baseOffset := offset + i * 16; // 4 singles = 16 bytes
 
      Move(binData[baseOffset], x, SizeOf(Single));
@@ -431,6 +440,7 @@ end;
 function TGLBParser.ReadHeader(stream: TFileStream): TGLBHeader;
 begin
    Result := TGLBHeader.Create;
+   // Liest die ersten 12 Bytes des GLB-Headers
    stream.Read(Result.Magic, SizeOf(Result.Magic));
    stream.Read(Result.Version, SizeOf(Result.Version));
    stream.Read(Result.Length, SizeOf(Result.Length));
@@ -439,6 +449,7 @@ end;
 function TGLBParser.ReadChunk(stream: TFileStream): TGLBChunk;
 begin
    Result := TGLBChunk.Create;
+   // Jeder Chunk beginnt mit Laenge und Typ
    stream.Read(Result.Length, SizeOf(Result.Length));
    stream.Read(Result.Typ, SizeOf(Result.Typ));
 

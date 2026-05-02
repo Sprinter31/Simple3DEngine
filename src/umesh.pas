@@ -46,9 +46,11 @@ var
 begin
   Result := TMesh.Create;
 
+  // Erstellt gleich große Arrays für die Kopie
   SetLength(Result.Vertices, Length(Vertices));
   SetLength(Result.Lines, Length(Lines));
 
+  // Kopiert alle Eckpunkte des Meshes
   for i := 0 to High(Vertices) do
     Result.Vertices[i] := TVertex.Create(
       Vertices[i].X,
@@ -56,6 +58,7 @@ begin
       Vertices[i].Z
     );
 
+  // Kopiert alle Verbindungen zwischen den Eckpunkten
   for i := 0 to High(Lines) do
     Result.Lines[i] := TLine.Create(
       Lines[i].A,
@@ -67,9 +70,11 @@ destructor TMesh.Destroy;
 var
   i: Integer;
 begin
+  // Gibt zuerst die Eckpunkte frei
   for i := 0 to High(Vertices) do
     Vertices[i].Free;
 
+  // Gibt danach die Linien frei
   for i := 0 to High(Lines) do
     Lines[i].Free;
 

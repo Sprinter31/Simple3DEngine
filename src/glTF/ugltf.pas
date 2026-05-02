@@ -139,6 +139,7 @@ begin
    Result := TGLBData.Create;
    Result.Animation := TAnimationData.Create;
 
+   // Oeffnet die GLB-Datei im Lesemodus
    stream := TFileStream.Create(path, fmOpenRead);
    try
       header := ReadHeader(stream);

@@ -48,12 +48,15 @@ var line: T2DLine;
 begin
   Result := TBitmap.Create;
 
+  // Erstellt das Bild in der aktuellen Fenstergröße
   Result.Width := Round(FScreenWidth);
   Result.Height := Round(FScreenHeight);
 
+  // Faerbt den Hintergrund schwarz
   Result.Canvas.Brush.Color := clBlack;
   Result.Canvas.FillRect(Rect(0, 0, Result.Width, Result.Height));
 
+  // Zeichnet das Modell als grünes Drahtgitter
   Result.Canvas.Pen.Color := clGreen;
   Result.Canvas.Pen.Width := 1;
 
@@ -72,9 +75,11 @@ begin
    for i := Low(mesh.Lines) to High(mesh.Lines) do begin
       line := mesh.Lines[i];
 
+      // Holt die beiden Eckpunkte der aktuellen Linie
       vertexA := mesh.Vertices[line.A];
       vertexB := mesh.Vertices[line.B];
 
+      // Rechnet die 3D-Punkte in Bildschirmkoordinaten um
       pointA := TranslateToScreen(ProjectTo2D(vertexA));
       pointB := TranslateToScreen(ProjectTo2D(vertexB));
 
@@ -85,6 +90,7 @@ end;
 function TRenderer.ProjectTo2D(vertex: TVertex): T2DPoint;
 var z: Double;
 begin
+  // Verschiebt das Modell vor die Kamera
   z := vertex.Z + 5;
   if Abs(z) < 0.1 then
     Result := T2DPoint.Create(FScreenWidth*2, FScreenWidth*2) // Außerhalb des Sichtfeldes
@@ -95,6 +101,7 @@ end;
 function TRenderer.TranslateToScreen(p: T2DPoint): T2DPoint;
 var x, y: Double;
 begin
+   // Wandelt den normierten Punkt in Pixelkoordinaten um
    x := (p.X + 1) * FScreenWidth/2;
    y := (p.Y * -1 + 1) * FScreenHeight/2;
    Result := T2DPoint.Create(x, y);
