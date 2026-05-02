@@ -5,8 +5,8 @@ unit uMesh;
 interface
 
 type
-  TLine = class;
-  TVertex = class;
+  TLine = record;
+  TVertex = record;
 
   TLineArray = Array of TLine;
   TVertexArray = Array of TVertex;
@@ -20,14 +20,12 @@ type
       destructor Destroy; override;
   end;
 
-  TLine = class
+  TLine = record
     A, B: Integer; // Indizes von den zu verbindenden Vertices
-    constructor Create(aA, aB: Integer);
   end;
 
-  TVertex = class // Eckpunkt im drei dimensionalen Raum
+  TVertex = record // Eckpunkt im drei dimensionalen Raum
     X, Y, Z: Double;
-    constructor Create(aX, aY, aZ: Double);
   end;
 
 implementation
@@ -41,17 +39,26 @@ begin
 end;
 
 function TMesh.Clone: TMesh;
-var i: Integer;
+var
+  i: Integer;
 begin
   Result := TMesh.Create;
+
   SetLength(Result.Vertices, Length(Vertices));
   SetLength(Result.Lines, Length(Lines));
 
-  for i := 0 to High(Result.Vertices) do
-        Result.Vertices[i] := Vertices[i];
+  for i := 0 to High(Vertices) do
+    Result.Vertices[i] := TVertex.Create(
+      Vertices[i].X,
+      Vertices[i].Y,
+      Vertices[i].Z
+    );
 
-  for i := 0 to High(Result.Lines) do
-        Result.Lines[i] := Lines[i];
+  for i := 0 to High(Lines) do
+    Result.Lines[i] := TLine.Create(
+      Lines[i].A,
+      Lines[i].B
+    );
 end;
 
 destructor TMesh.Destroy;

@@ -1,6 +1,7 @@
 unit uRenderer;
 
 {$mode ObjFPC}{$H+}
+{$modeswitch advancedrecords}
 
 interface
 
@@ -8,8 +9,16 @@ uses
   Classes, SysUtils, Graphics, uMesh, Math;
 
 type
-  T2DPoint = class;
-  T2DLine = class;
+  T2DPoint = record
+    X: Double;
+    Y: Double;
+    constructor Create(aX, aY: Double);
+  end;
+
+  T2DLine = record
+    A, B: T2DPoint;
+    constructor Create(aA, aB: T2DPoint);
+  end;
 
   T2DLineArray = Array of T2DLine;
 
@@ -23,18 +32,6 @@ type
       function RenderMesh(mesh: TMesh): TBitmap;
       constructor Create(ScreenWidth, ScreenHeight: Double);
   end;
-
-  T2DLine = class
-    A, B: T2DPoint;
-    constructor Create(aA, aB: T2DPoint);
-  end;
-
-  T2DPoint = class
-      X: Double;
-      Y: Double;
-      constructor Create(aX, aY: Double);
-    end;
-
 
 implementation
 
@@ -120,4 +117,3 @@ begin
 end;
 
 end.
-

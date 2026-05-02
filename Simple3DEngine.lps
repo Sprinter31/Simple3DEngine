@@ -26,8 +26,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uMesh"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="46"/>
-        <CursorPos X="39" Y="55"/>
+        <CursorPos X="16" Y="23"/>
         <UsageCount Value="71"/>
         <Loaded Value="True"/>
       </Unit>
@@ -43,9 +42,9 @@
         <Filename Value="src\urenderer.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uRenderer"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="67"/>
-        <CursorPos Y="78"/>
+        <CursorPos X="3" Y="12"/>
         <UsageCount Value="70"/>
         <Loaded Value="True"/>
       </Unit>
@@ -105,7 +104,6 @@
       <Unit>
         <Filename Value="src\uanimation.pas"/>
         <UnitName Value="uAnimation"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="7"/>
         <CursorPos X="6" Y="42"/>
@@ -156,46 +154,6 @@
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="src\uanimation.pas"/>
-        <Caret Line="31" TopLine="22"/>
-      </Position>
-      <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="51" TopLine="28"/>
-      </Position>
-      <Position>
-        <Filename Value="src\urenderer.pas"/>
-        <Caret Line="120" TopLine="70"/>
-      </Position>
-      <Position>
-        <Filename Value="src\uanimation.pas"/>
-        <Caret Line="31" TopLine="22"/>
-      </Position>
-      <Position>
-        <Filename Value="src\uanimation.pas"/>
-        <Caret Line="32" TopLine="22"/>
-      </Position>
-      <Position>
-        <Filename Value="src\uanimation.pas"/>
-        <Caret Line="49" Column="12" TopLine="22"/>
-      </Position>
-      <Position>
-        <Filename Value="src\urenderer.pas"/>
-        <Caret Line="120" TopLine="70"/>
-      </Position>
-      <Position>
-        <Filename Value="src\uanimation.pas"/>
-        <Caret Line="31" Column="12"/>
-      </Position>
-      <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="52" Column="129"/>
-      </Position>
-      <Position>
-        <Filename Value="src\umain.pas"/>
-        <Caret Line="62" Column="92" TopLine="42"/>
-      </Position>
       <Position>
         <Filename Value="src\umain.pas"/>
         <Caret Line="63" Column="92" TopLine="43"/>
@@ -275,6 +233,46 @@
       <Position>
         <Filename Value="src\umesh.pas"/>
         <Caret Line="65" Column="39" TopLine="21"/>
+      </Position>
+      <Position>
+        <Filename Value="src\umesh.pas"/>
+        <Caret Line="23" Column="22"/>
+      </Position>
+      <Position>
+        <Filename Value="src\umesh.pas"/>
+        <Caret Line="26" Column="16"/>
+      </Position>
+      <Position>
+        <Filename Value="src\umesh.pas"/>
+        <Caret Line="9" Column="19"/>
+      </Position>
+      <Position>
+        <Filename Value="src\urenderer.pas"/>
+        <Caret Line="63" Column="35" TopLine="34"/>
+      </Position>
+      <Position>
+        <Filename Value="src\urenderer.pas"/>
+        <Caret Line="50" Column="5" TopLine="34"/>
+      </Position>
+      <Position>
+        <Filename Value="src\urenderer.pas"/>
+        <Caret Line="28" Column="20"/>
+      </Position>
+      <Position>
+        <Filename Value="src\urenderer.pas"/>
+        <Caret Line="12" Column="19"/>
+      </Position>
+      <Position>
+        <Filename Value="src\urenderer.pas"/>
+        <Caret Line="11" Column="21"/>
+      </Position>
+      <Position>
+        <Filename Value="src\urenderer.pas"/>
+        <Caret Line="12" Column="3"/>
+      </Position>
+      <Position>
+        <Filename Value="src\urenderer.pas"/>
+        <Caret Line="35" Column="9"/>
       </Position>
     </JumpHistory>
     <RunParams>

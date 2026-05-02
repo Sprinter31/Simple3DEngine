@@ -1,6 +1,7 @@
 unit uRenderer;
 
 {$mode ObjFPC}{$H+}
+{$modeswitch advancedrecords}
 
 interface
 
@@ -8,8 +9,8 @@ uses
   Classes, SysUtils, Graphics, uMesh, Math;
 
 type
-  T2DPoint = class;
-  T2DLine = class;
+  T2DPoint = record;
+  T2DLine = record;
 
   T2DLineArray = Array of T2DLine;
 
@@ -24,17 +25,14 @@ type
       constructor Create(ScreenWidth, ScreenHeight: Double);
   end;
 
-  T2DLine = class
+  T2DLine = record
     A, B: T2DPoint;
-    constructor Create(aA, aB: T2DPoint);
   end;
 
-  T2DPoint = class
+  T2DPoint = record
       X: Double;
       Y: Double;
-      constructor Create(aX, aY: Double);
     end;
-
 
 implementation
 
@@ -88,11 +86,11 @@ end;
 function TRenderer.ProjectTo2D(vertex: TVertex): T2DPoint;
 var z: Double;
 begin
-  z := vertex.Z + 2;
+  z := vertex.Z + 5;
   if Abs(z) < 0.1 then
     Result := T2DPoint.Create(FScreenWidth*2, FScreenWidth*2) // Außerhalb des Sichtfeldes
   else
-    Result := T2DPoint.Create(vertex.X / z, (vertex.Y - 1) / z);
+    Result := T2DPoint.Create(vertex.X / z, (vertex.Y) / z);
 end;
 
 function TRenderer.TranslateToScreen(p: T2DPoint): T2DPoint;
